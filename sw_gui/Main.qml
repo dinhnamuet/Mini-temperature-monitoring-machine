@@ -120,7 +120,17 @@ ApplicationWindow {
                 text: "Download Program to Device!"
                 highlighted: true
                 onClicked: {
-                    stm32.startUpdateFirmware(devfs, fileDialog.selectedFile)
+                    if (devfs != "" && fileDialog.selectedFile != "") {
+                        progress.indeterminate = true
+                        progress.visible = true
+                        progress_txt.color = "Black"
+                        progress_txt.text = "Wait for erase memory!"
+                        stm32.startUpdateFirmware(devfs, fileDialog.selectedFile)
+                    } else {
+                        progress_txt.text = "Device or Binary not found, Please try again!"
+                        progress_txt.color = "Red"
+                        progress_txt.font.italic = true
+                    }
                 }
             }
 
@@ -131,11 +141,13 @@ ApplicationWindow {
                     anchors.fill: parent
                     Text {
                         id: progress_txt
-                        text: "Updating: " + progress.value + "%"
+                        visible: true
+                        text: "Status"
                     }
 
                     ProgressBar {
                         id: progress
+                        visible: false
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: parent.width * 0.7
                         from: 0
@@ -173,7 +185,13 @@ ApplicationWindow {
         }
         function onUpdateCompleted() {
             progress.value = 100
+            progress_txt.color = "green"
             progress_txt.text = "Update Firmware Successfully!"
+        }
+        function onEraseCompleted() {
+            progress_txt.text = "Wait 2s!"
+            progress.indeterminate = false
+            progress_txt.font.italic = true
         }
     }
 

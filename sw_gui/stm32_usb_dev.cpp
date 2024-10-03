@@ -1,8 +1,10 @@
- #include "stm32_usb_dev.h"
+#include "stm32_usb_dev.h"
 #include <QDir>
 #include "CRC.h"
 #include <stdio.h>
 #include <sys/stat.h>
+
+#define TIMING  50000
 
 stm32_usb_dev::stm32_usb_dev(QObject *parent)
     : QObject{parent}, update_progress(0), total_len(0)
@@ -38,6 +40,7 @@ void stm32_usb_dev::startUpdateFirmware(QString dev, QString hex){
         FirmwareUpdateWorker worker;
         connect(&worker, &FirmwareUpdateWorker::updateCompleted, this, &::stm32_usb_dev::updateCompleted);
         connect(&worker, &FirmwareUpdateWorker::progressChanged, this, &stm32_usb_dev::setProgress);
+        connect(&worker, &FirmwareUpdateWorker::eraseCompleted, this, &stm32_usb_dev::eraseCompleted);
         worker.startUpdate(devfs, hex);
     });
     connect(thread, &QThread::finished, thread, &QObject::deleteLater);
@@ -46,11 +49,11 @@ void stm32_usb_dev::startUpdateFirmware(QString dev, QString hex){
 }
 
 void FirmwareUpdateWorker::update_fw(){
-    char buffer[1024];
+    char buffer[1024] = { 0 };
     char line_rd[50] = {0};
     ssize_t bytesRead;
     int lineLength = 0;
-    u8 hex[50];
+    u8 hex[50] = { 0 };
     u32 prog = 0;
     struct stat hex_file;
 
@@ -84,7 +87,7 @@ void FirmwareUpdateWorker::update_fw(){
                     } else {
                         qDebug()<<"Device send NACK, Error Code: "<<recv_task.msg_error;
                     }
-                    usleep(200000);
+                    usleep(TIMING);
                 }
                 lineLength = 0;
             } else if (buffer[i] == ':') {
@@ -125,7 +128,7 @@ void FirmwareUpdateWorker::update_fw(){
             } else {
                 qDebug()<<"Device send NACK, Error Code: "<<recv_task.msg_error;
             }
-            usleep(200000);
+            usleep(TIMING);
         }
     }
     usb_request(MSG_GOTO_APP, NULL, 0);
@@ -201,6 +204,7 @@ void FirmwareUpdateWorker::ascii_2_hex(char *asc_code, unsigned char *hex_code, 
 }
 
 void FirmwareUpdateWorker::startUpdate(QString dev, QString hex) {
+    u8 try_count = 8;
     dev_desc = open(dev.toUtf8().constData(), O_RDWR);
     if (-1 == dev_desc) {
         qDebug()<<"Open "<<dev.toUtf8().constData()<<" failed!";
@@ -212,5 +216,31 @@ void FirmwareUpdateWorker::startUpdate(QString dev, QString hex) {
         close(dev_desc);
         return;
     }
+retry:
+    if (--try_count == 0)
+        goto exit;
+    if (usb_request(MSG_DEV_ERASE, NULL, 0) < 0) {
+        qDebug()<<__func__<<", "<<__LINE__;
+        goto retry;
+    }
+    if (usb_recv() < 0) {
+        qDebug()<<__func__<<", "<<__LINE__;
+        goto retry;
+    }
+    if (usb_err_check() < 0) {
+        qDebug()<<__func__<<", "<<__LINE__;
+        goto retry;
+    } else {
+        if (recv_task.msg_error == MSG_SUCCESS) {
+            emit eraseCompleted();
+        } else {
+            qDebug()<<__func__<<", "<<__LINE__;
+            goto retry;
+        }
+        sleep(2);
+    }
     update_fw();
+exit:
+    close(dev_desc);
+    close(hex_desc);
 }

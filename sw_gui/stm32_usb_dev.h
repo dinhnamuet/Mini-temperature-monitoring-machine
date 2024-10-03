@@ -9,12 +9,11 @@
 #include <QStringList>
 #include <QThread>
 
-#define SUCCESS             true
-#define FAILED              false
 /* Message type */
-#define MSG_REQUEST_DATA	0x2002
-#define MSG_GOTO_APP		0x1979
-#define MSG_PROGRAM_DATA    0x2001
+#define MSG_REQUEST_DATA	0x2001
+#define MSG_GOTO_APP		0x2002
+#define MSG_PROGRAM_DATA    0x2003
+#define MSG_DEV_ERASE		0x2004
 /* Error Code */
 #define	MSG_SUCCESS			0x3230
 #define MSG_INVALID			0x3231
@@ -42,7 +41,10 @@ class FirmwareUpdateWorker : public QObject {
 public:
     explicit FirmwareUpdateWorker(QObject *parent = nullptr)
         : QObject(parent), total_len(0)
-    {}
+    {
+        memset(&send_task, 0x00, sizeof(struct task_struct));
+        memset(&recv_task, 0x00, sizeof(struct task_struct));
+    }
 
     void startUpdate(QString dev, QString hex);
 private:
@@ -59,6 +61,7 @@ private:
 signals:
     void progressChanged(uint8_t progress);
     void updateCompleted();
+    void eraseCompleted();
 };
 
 class stm32_usb_dev : public QObject
@@ -89,6 +92,7 @@ private:
 signals:
     void progressChanged(uint8_t progress);
     void updateCompleted();
+    void eraseCompleted();
 };
 
 #endif // STM32_USB_DEV_H
