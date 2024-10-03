@@ -1,9 +1,0 @@
-../Core/Src/CRC.c:46:6:CRC_Init	8	static
-../Core/Src/CRC.c:54:9:CRC_CalculateCRC8	24	static
-../Core/Src/CRC.c:106:10:CRC_CalculateCRC16	24	static
-../Core/Src/CRC.c:162:10:CRC_CalculateCRC32	24	static
-../Core/Src/CRC.c:224:13:CRC_CalculateCRC8Table	4	static
-../Core/Src/CRC.c:252:13:CRC_CalculateCRC16Table	4	static
-../Core/Src/CRC.c:283:13:CRC_CalculateCRC32Table	4	static
-../Core/Src/CRC.c:311:16:CRC_ReverseBitOrder8	16	static
-../Core/Src/CRC.c:321:17:CRC_ReverseBitOrder32	24	static
