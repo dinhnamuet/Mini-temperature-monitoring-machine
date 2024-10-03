@@ -2,7 +2,7 @@
  * usb_handle.c
  *
  *  Created on: Sep 25, 2024
- *      Author: nam
+ *      Author: dinhnamuet
  */
 
 #include "usb_handle.h"
@@ -34,15 +34,25 @@ int usb_handle_packet(struct task_struct *task) {
 			response_task.data_length = sizeof(u16);
 			adc_val++;
 			break;
+
 		case MSG_GOTO_APP:
 			response_task.data_length = 0;
 			break;
+
 		case MSG_PROGRAM_DATA:
 			if (hex_line_handler(task->data, task->data_length) != HEX_SUCCESS) {
 				response_task.msg_error = MSG_FAILED;
 			}
 			response_task.data_length = 0;
 			break;
+
+		case MSG_DEV_ERASE:
+			if (flash_erase(FLASH_SECTOR_5, 3) != HAL_OK) {
+				response_task.msg_error = MSG_FAILED;
+			}
+			response_task.data_length = 0;
+			break;
+
 		default:
 			response_task.msg_error = MSG_INVALID;
 			response_task.data_length = 0;

@@ -1,0 +1,5 @@
+../Core/Src/task_list.c:10:6:free_task_list	16	static
+../Core/Src/task_list.c:19:5:queue_is_empty	24	static
+../Core/Src/task_list.c:28:5:put_task_to_queue	40	static
+../Core/Src/task_list.c:45:21:get_new_task	32	static
+../Core/Src/task_list.c:62:5:init_queue	24	static

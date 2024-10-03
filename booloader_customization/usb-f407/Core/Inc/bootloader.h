@@ -52,5 +52,4 @@ void start_boot_checking(struct boot_button *button);
 void __attribute__((noreturn)) goto_application(u32 p_addr);
 err_t hex_line_handler(const u8 *hex_line, u32 length);
 
-
 #endif /* INC_BOOTLOADER_H_ */

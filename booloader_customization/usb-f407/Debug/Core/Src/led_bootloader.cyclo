@@ -1,0 +1,6 @@
+../Core/Src/led_bootloader.c:10:6:led_ctrl	2
+../Core/Src/led_bootloader.c:16:6:led_increase_counter	1
+../Core/Src/led_bootloader.c:19:6:led_set_counter	1
+../Core/Src/led_bootloader.c:22:5:led_get_counter	1
+../Core/Src/led_bootloader.c:25:6:led_set_blynk_period	1
+../Core/Src/led_bootloader.c:28:5:led_get_blynk_period	1

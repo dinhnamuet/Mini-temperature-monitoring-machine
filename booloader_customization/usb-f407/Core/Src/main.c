@@ -109,10 +109,6 @@ int main(void)
 #if defined(BOOT_OPER)
 	/* Hardware Boot Option */
 	start_boot_checking(&button);
-	/* Erase Flash Memory */
-	flash_erase(FLASH_SECTOR_5, 1);
-	flash_erase(FLASH_SECTOR_6, 1);
-	flash_erase(FLASH_SECTOR_7, 1);
 #endif
 	/* USB Queue Initialization */
 	if (init_queue(&usb_queue, 10) < 0) {
